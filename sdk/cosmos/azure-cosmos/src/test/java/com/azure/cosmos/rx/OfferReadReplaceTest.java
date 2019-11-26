@@ -10,6 +10,7 @@ import com.azure.cosmos.implementation.Offer;
 import com.azure.cosmos.implementation.ResourceResponse;
 import com.azure.cosmos.implementation.ResourceResponseValidator;
 import com.azure.cosmos.implementation.TestSuiteBase;
+import com.google.common.collect.Lists;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Factory;
@@ -33,50 +34,43 @@ public class OfferReadReplaceTest extends TestSuiteBase {
         super(clientBuilder);
     }
 
-    @Test(groups = { "emulator" }, timeOut = TIMEOUT)
+    @Test(groups = {"emulator"}, timeOut = TIMEOUT)
     public void readAndReplaceOffer() {
+        List<Offer> offers = Lists.newArrayList(
+            client.readOffers(null).flatMap(page -> Flux.fromIterable(page.getResults())).toIterable());
 
-        client.readOffers(null).subscribe((offersFeed) -> {
-            try {
-                int i;
-                List<Offer> offers = offersFeed.getResults();
-                for (i = 0; i < offers.size(); i++) {
-                    if (offers.get(i).getOfferResourceId().equals(createdCollection.getResourceId())) {
-                        break;
-                    }
-                }
-
-                Offer rOffer = client.readOffer(offers.get(i).getSelfLink()).single().block().getResource();
-                int oldThroughput = rOffer.getThroughput();
-
-                Flux<ResourceResponse<Offer>> readObservable = client.readOffer(offers.get(i).getSelfLink());
-
-                // validate offer read
-                ResourceResponseValidator<Offer> validatorForRead = new ResourceResponseValidator.Builder<Offer>()
-                        .withOfferThroughput(oldThroughput)
-                        .notNullEtag()
-                        .build();
-
-                validateSuccess(readObservable, validatorForRead);
-
-                // update offer
-                int newThroughput = oldThroughput + 100;
-                offers.get(i).setThroughput(newThroughput);
-                Flux<ResourceResponse<Offer>> replaceObservable = client.replaceOffer(offers.get(i));
-
-                // validate offer replace
-                ResourceResponseValidator<Offer> validatorForReplace = new ResourceResponseValidator.Builder<Offer>()
-                        .withOfferThroughput(newThroughput)
-                        .notNullEtag()
-                        .build();
-
-                validateSuccess(replaceObservable, validatorForReplace);
-
-            } catch (Exception e) {
-                e.printStackTrace();
+        int i;
+        for (i = 0; i < offers.size(); i++) {
+            if (offers.get(i).getOfferResourceId().equals(createdCollection.getResourceId())) {
+                break;
             }
+        }
 
-        });
+        Offer rOffer = client.readOffer(offers.get(i).getSelfLink()).single().block().getResource();
+        int oldThroughput = rOffer.getThroughput();
+
+        Flux<ResourceResponse<Offer>> readObservable = client.readOffer(offers.get(i).getSelfLink());
+
+        // validate offer read
+        ResourceResponseValidator<Offer> validatorForRead = new ResourceResponseValidator.Builder<Offer>()
+            .withOfferThroughput(oldThroughput)
+            .notNullEtag()
+            .build();
+
+        validateSuccess(readObservable, validatorForRead);
+
+        // update offer
+        int newThroughput = oldThroughput + 100;
+        offers.get(i).setThroughput(newThroughput);
+        Flux<ResourceResponse<Offer>> replaceObservable = client.replaceOffer(offers.get(i));
+
+        // validate offer replace
+        ResourceResponseValidator<Offer> validatorForReplace = new ResourceResponseValidator.Builder<Offer>()
+            .withOfferThroughput(newThroughput)
+            .notNullEtag()
+            .build();
+
+        validateSuccess(replaceObservable, validatorForReplace);
     }
 
     @BeforeClass(groups = { "emulator" }, timeOut = SETUP_TIMEOUT)
