@@ -190,10 +190,11 @@ public class StoreClient implements IStoreClient {
         }
 
         if (sessionToken != null) {
-            headers.put(HttpConstants.HttpHeaders.SESSION_TOKEN, String.format(
-                "%s:%s",
-                partitionKeyRangeId,
-                sessionToken.convertToString()));
+            String sessionTokenString =
+                partitionKeyRangeId + ":" +
+                    sessionToken.convertToString();
+
+            headers.put(HttpConstants.HttpHeaders.SESSION_TOKEN, sessionTokenString);
         }
 
         headers.remove(WFConstants.BackendHeaders.PARTITION_KEY_RANGE_ID);
