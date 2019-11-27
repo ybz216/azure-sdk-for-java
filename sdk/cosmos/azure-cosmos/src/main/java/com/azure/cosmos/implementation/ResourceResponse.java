@@ -3,10 +3,12 @@
 
 package com.azure.cosmos.implementation;
 
+import com.azure.cosmos.BridgeInternal;
 import com.azure.cosmos.CosmosResponseDiagnostics;
 import com.azure.cosmos.Resource;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +20,7 @@ import java.util.Map;
  * @param <T> the resource type of the resource response.
  */
 public final class ResourceResponse<T extends Resource> {
+    public final String resourceAsString;
     private Class<T> cls;
     private T resource;
     private RxDocumentServiceResponse response;
@@ -29,7 +32,7 @@ public final class ResourceResponse<T extends Resource> {
         this.usageHeaders = new HashMap<String, Long>();
         this.quotaHeaders = new HashMap<String, Long>();
         this.cls = cls;
-        this.resource = this.response.getResource(this.cls);
+        this.resourceAsString = this.response.getReponseBodyAsString();
     }
 
     /**
@@ -265,7 +268,7 @@ public final class ResourceResponse<T extends Resource> {
      * @return the resource.
      */
     public T getResource() {
-        return this.resource;
+        return this.response.getResource(cls);
     }
 
     /**

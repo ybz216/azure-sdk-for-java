@@ -10,11 +10,12 @@ public class CosmosAsyncItemResponse extends CosmosResponse<CosmosItemProperties
 
     CosmosAsyncItemResponse(ResourceResponse<Document> response, PartitionKey partitionKey, CosmosAsyncContainer container) {
         super(response);
-        if(response.getResource() == null){
+        if(response.resourceAsString == null){
             super.setProperties(null);
         }else{
-            super.setProperties(new CosmosItemProperties(response.getResource().toJson()));
-            itemClient = new CosmosAsyncItem(response.getResource().getId(),partitionKey, container);
+            CosmosItemProperties cip = new CosmosItemProperties(response.resourceAsString);
+            super.setProperties(cip);
+            itemClient = new CosmosAsyncItem(cip.getId(), partitionKey, container);
         }
     }
 
