@@ -28,8 +28,12 @@ abstract class RntbdTokenStream<T extends Enum<T> & RntbdHeader> {
         checkNotNull(ids, "ids");
         checkNotNull(in, "in");
 
-        final Collector<T, ?, ImmutableMap<T, RntbdToken>> collector = Maps.toImmutableEnumMap(h -> h, RntbdToken::create);
-        this.tokens = headers.stream().collect(collector);
+        ImmutableMap.Builder<T, RntbdToken> builder = ImmutableMap.builderWithExpectedSize(headers.size());
+        for(T header : headers) {
+            builder.put(header, RntbdToken.create(header));
+        }
+
+        this.tokens = builder.build();
         this.headers = ids;
         this.in = in.retain();
     }
