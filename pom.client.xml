@@ -94,7 +94,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <packageOutputDirectory>${artifactStagingDirectory}/${project.artifactId}</packageOutputDirectory>
+    <packageOutputDirectory>${project.build.directory}</packageOutputDirectory>
     <legal>
       <![CDATA[[INFO] Any downloads listed may be third party software.  Microsoft grants you no rights for third party software.]]></legal>
     <testMode>playback</testMode>
